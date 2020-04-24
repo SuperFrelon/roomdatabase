@@ -30,13 +30,19 @@ class MainActivity : AppCompatActivity() {
 
         val viewManager = LinearLayoutManager(this)
         val viewAdapter = FriendListAdapter(allFriends)
-        viewAdapter.setItemClickListener(
-            object: FriendListAdapter.ItemClickListener {
-                override fun onItemClick(view: View, position: Int) {
-                    val toRemove = allFriends[position]
-                    database.friendDao().deleteFriend(toRemove)
-                    allFriends = database.friendDao().getAllFriends()
-                    viewAdapter.updateData( allFriends );
+        fun refreshAdaptor() = viewAdapter.updateData(database.friendDao().getAllFriends())
+
+        viewAdapter.setEventListener(
+            object: FriendListAdapter.EventListener {
+
+                override fun onDeleteFriend(deletedFriend: Friend) {
+                    database.friendDao().deleteFriend(deletedFriend)
+                    refreshAdaptor()
+                }
+
+                override fun onUpdateFriend(updatedFriend: Friend) {
+                    database.friendDao().updateFriend(updatedFriend)
+                    refreshAdaptor()
                 }
             }
         )
